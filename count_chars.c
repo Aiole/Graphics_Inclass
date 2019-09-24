@@ -12,8 +12,38 @@ int con[10][1000][20];
 double red[10][1000],grn[10][1000],blu[10][1000];
 
 
+void translate(int onum, double dx, double dy){
+
+  for(int i = 0; i < numpoint[onum]; i++){
+
+    x[onum][i] += dx;
+    y[onum][i] += dy;
+
+  }
+
+}
+
+
+void scale(int onum, double sx, double sy){
+
+  for(i=0; i < numpoints[onum]; i++){
+
+    x[onum][i] *= sx;
+    y[onum][i] *= sy;
+
+  }
+
+}
+
+
 int main(int argc, char **argv){
 
+
+   G_init_graphics(800,800);
+   G_rgb(0,0,0);
+   G_clear;
+   G_rgb(0,1,0);
+    
   int i,k,count,j;
 
   FILE *fp;
@@ -45,7 +75,8 @@ int main(int argc, char **argv){
     for(j=0; j < *psize[k][i]; j++){
      fscanf(fp, "%d", &con[k][i][j]);
 
-   }
+
+    }
    }
 
     for(i=0; i < numpolys[k]; i++){
@@ -56,18 +87,27 @@ int main(int argc, char **argv){
 
    }
   
-  int new_i,p_size,temp_n;
+ 
 
-  while(1){
-    new_i = 0;
-   *p_size = &(psize[i]);
+  move();
+}
 
-    while(p_size < new_i){
+void draw(int onum){
 
-      
-      temp_n = &(psize[p_size][new_i]);
-      
-      new_i++;
+  double xp[100], yp[100];
+  int new_i,p_size,temp_n,n,i;
+  i = 0;
+  n = 0;
+  
+  
+  for(int p = 0; p < numpolys; p++){
+
+    n = psize[onum][p];
+
+    for(i = 0; i < n; i++){
+
+      temp_n = con[n][i];
+     
     }
 
   
@@ -76,24 +116,16 @@ int main(int argc, char **argv){
 
 
 
-  
 }
 
+void move(double xp[], double yp[], int n){
 
-
-void draw_polygon(double xp[], double yp[], int n){
-
-
-    G_init_graphics(800,800);
-    G_rgb(0,0,0);
-    G_clear;
-    G_rgb(0,1,0);
-    G_wait_key();
-
-  
-  G_fill_polygon(xp,yp,n);
+  double yhi,ylo;
+  int onum;
+ 
 
   w = G_wait_key();
   onum = w-48;
 
 }
+ 
