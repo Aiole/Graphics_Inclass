@@ -6,15 +6,16 @@
 int numobjects;
 int numpoints[10];
 double x[10][1500], y[10][1500];
+double dx[1500], dy[1500];
 int numpolys[10];
-int psize[10][10][1000];
+int psize[10][1000];
 int con[10][1000][20];
 double red[10][1000],grn[10][1000],blu[10][1000];
 
 
 void translate(int onum, double dx, double dy){
 
-  for(int i = 0; i < numpoint[onum]; i++){
+  for(int i = 0; i < numpoints[onum]; i++){
 
     x[onum][i] += dx;
     y[onum][i] += dy;
@@ -26,7 +27,7 @@ void translate(int onum, double dx, double dy){
 
 void scale(int onum, double sx, double sy){
 
-  for(i=0; i < numpoints[onum]; i++){
+  for(int i = 0; i < numpoints[onum]; i++){
 
     x[onum][i] *= sx;
     y[onum][i] *= sy;
@@ -34,6 +35,54 @@ void scale(int onum, double sx, double sy){
   }
 
 }
+
+
+
+
+void draw(int onum){
+
+  double xp[100], yp[100];
+  int i,pnum,n,temp_n;
+  double redd,grnn,bluu;
+  
+
+
+  G_rgb (1,1,1);
+  G_clear();
+  
+  printf("onum = %d\n",onum) ;
+  printf("numpolys = %d\n",numpolys[onum]);
+
+  
+  for(pnum = 0; pnum < numpolys[onum]; pnum++){
+
+    n = psize[onum][pnum];
+
+    for(i = 0; i < n; i++){
+      temp_n = con[onum][pnum][i];      
+      xp[i] = x[onum][temp_n];
+      yp[i] = y[onum][temp_n];
+      printf("(%lf, %lf) ",xp[i],yp[i]);
+    }
+    printf("\n") ;
+
+    redd = red[onum][pnum];
+    grnn = grn[onum][pnum];
+    bluu = blu[onum][pnum];
+
+    G_rgb (redd, grnn, bluu);
+
+
+    G_fill_polygon (xp,yp,i);
+    
+  }
+
+
+}
+
+
+
+ 
 
 
 int main(int argc, char **argv){
@@ -44,88 +93,113 @@ int main(int argc, char **argv){
    G_clear;
    G_rgb(0,1,0);
     
-  int i,k,count,j;
+   int i,onum,count,j,w,pnum,n;
+   double xtrans,ytrans,yhi,ylo,xhi,xlo,sclr;
+   ylo = 1000;
+   xlo = 1000;
 
   FILE *fp;
 
-  for(k=0; k < numobjects; k++){
+  numobjects = argc - 1 ;
   
-  fp = fopen(argv[k+1], "r");
+  for(onum=0; onum < numobjects; onum++){
+  
+  fp = fopen(argv[onum+1], "r");
   
   if(fp == NULL){
-
-    printf("cant open file %s \n", argv[2]);
+    printf("cant open file %s \n", argv[onum+1]);
     exit(0);
   }
   
-  fscanf(fp, "%d", &numpoints[k]);
+  fscanf(fp, "%d", &numpoints[onum]);
   
-  for(i=0; i < *numpoints; i++){
-
-    fscanf(fp, "%lf %lf", &x[k][i], &y[k][i]);
-    
+  for(i=0; i < numpoints[onum]; i++){
+    fscanf(fp, "%lf %lf", &x[onum][i], &y[onum][i]);
   }
 
-   fscanf(fp, "%d", &numpolys[k]);
+   fscanf(fp, "%d", &numpolys[onum]);
 
-   for(i=0; i < numpolys[k]; i++){
+   for(i=0; i < numpolys[onum]; i++){
 
-    fscanf(fp, "%d", &psize[k][i][j]);
+    fscanf(fp, "%d", &psize[onum][i]);
     
-    for(j=0; j < *psize[k][i]; j++){
-     fscanf(fp, "%d", &con[k][i][j]);
-
-
+    for(j=0; j < psize[onum][i]; j++){
+     fscanf(fp, "%d", &con[onum][i][j]);
     }
    }
 
-    for(i=0; i < numpolys[k]; i++){
-      fscanf(fp, "%lf %lf %lf", &red[k][i], &grn[k][i], &blu[k][i]);
-
-   }
+    for(i=0; i < numpolys[onum]; i++){
+      fscanf(fp, "%lf %lf %lf", &red[onum][i], &grn[onum][i], &blu[onum][i]);
+    }
   
 
-   }
-  
- 
+  }
 
-  move();
-}
+  for(j=0; j<numobjects; j++){
 
-void draw(int onum){
+   for(pnum = 0; pnum < numpolys[j]; pnum++){
 
-  double xp[100], yp[100];
-  int new_i,p_size,temp_n,n,i;
-  i = 0;
-  n = 0;
-  
-  
-  for(int p = 0; p < numpolys; p++){
-
-    n = psize[onum][p];
+    n = psize[j][pnum];
 
     for(i = 0; i < n; i++){
 
-      temp_n = con[n][i];
-     
+      if(x[j][i] > xhi){
+	xhi = x[j][i];
+      }
+
+      if(y[j][i] > yhi){
+	yhi = y[j][i];
+      }
+
+      if(x[j][i] < xlo){
+	xlo = x[j][i];
+      }
+
+      if(y[j][i] < ylo){
+	ylo = y[j][i];
+      }
+
     }
-
+   }
+ 
+    ytrans = (yhi + ylo) / 2;
+    xtrans = (xhi + xlo) / 2;
+    printf("xhi = %lf, yhi = %lf, xlo = %lf, ylo = %lf",xhi,yhi,xlo,ylo);  
   
+  translate(j,-xtrans,-ytrans);
 
+  if(xtrans >= ytrans){
+
+    sclr = (800 / ytrans);
+    
+  } else{
+
+    sclr = (800 / xtrans);
+    
   }
 
+  
+  scale(j,sclr,sclr);
+  translate(j,400,400);
+  
+  }
 
-
-}
-
-void move(double xp[], double yp[], int n){
-
-  double yhi,ylo;
-  int onum;
  
 
+  while(1){
+
+
+  
   w = G_wait_key();
-  onum = w-48;
+  onum = w-49;
 
+  
+  draw(onum);
+
+
+  
+  }
+  
+    G_wait_key() ;
+    
 }
- 
