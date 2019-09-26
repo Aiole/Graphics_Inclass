@@ -37,6 +37,23 @@ void scale(int onum, double sx, double sy){
 }
 
 
+void rotate(int onum, double rad){
+
+
+    int i;
+    double t;
+    for(i=0; i<numpoints[onum]; i++){
+
+    t = ( x[onum][i] * cos(rad) ) - ( y[onum][i] * sin(rad) );
+    y[onum][i] = ( y[onum][i] * sin(rad) ) + ( x[onum][i] * cos(rad) );
+    x[onum][i] = t;
+
+
+    }
+
+
+
+}
 
 
 void draw(int onum){
@@ -92,12 +109,16 @@ int main(int argc, char **argv){
    G_rgb(0,0,0);
    G_clear;
    G_rgb(0,1,0);
-    
-   int i,onum,count,j,w,pnum,n;
+
+   char z;
+   int i,onum,count,j,w,pnum,n,temp_onum;
    double xtrans,ytrans,yhi,ylo,xhi,xlo,sclr;
    ylo = 1000;
    xlo = 1000;
+   xhi = -1000;
+   yhi = -1000;
 
+   
   FILE *fp;
 
   numobjects = argc - 1 ;
@@ -143,6 +164,7 @@ int main(int argc, char **argv){
 
     for(i = 0; i < n; i++){
 
+      printf("x = %lf, y = %lf ",x[j][i],y[j][i]);  
       if(x[j][i] > xhi){
 	xhi = x[j][i];
       }
@@ -161,10 +183,14 @@ int main(int argc, char **argv){
 
     }
    }
+
+   //printf("xhi = %lf, yhi = %lf, xlo = %lf, ylo = %lf",xhi,yhi,xlo,ylo);  
+   
  
-    ytrans = (yhi + ylo) / 2;
-    xtrans = (xhi + xlo) / 2;
-    printf("xhi = %lf, yhi = %lf, xlo = %lf, ylo = %lf",xhi,yhi,xlo,ylo);  
+   ytrans = (yhi + abs(ylo)) / 2;
+   xtrans = (xhi + abs(xlo)) / 2;
+
+   printf("xtrans = %lf, ytrans = %lf ",xtrans,ytrans);  
   
   translate(j,-xtrans,-ytrans);
 
@@ -184,17 +210,33 @@ int main(int argc, char **argv){
   
   }
 
+
+  temp_onum = 0;
  
 
   while(1){
 
 
-  
   w = G_wait_key();
   onum = w-49;
 
-  
-  draw(onum);
+  if(onum < 10 && onum > -1){
+
+    temp_onum = onum;
+
+    }
+
+ 
+
+  translate(temp_onum,-400,-400);
+    
+   if(w == ' '){
+     rotate(temp_onum,.8);
+
+  }
+
+  translate(temp_onum,400,400);
+  draw(temp_onum);
 
 
   
@@ -203,3 +245,6 @@ int main(int argc, char **argv){
     G_wait_key() ;
     
 }
+
+
+
